@@ -1,5 +1,7 @@
 require "easy_mapper/version"
 
 module EasyMapper
-  # Your code goes here...
+  def config(adapter_name: adaper, adapter_opts: opts)
+        
+  end 
 end
