@@ -5,7 +5,7 @@ module EasyMapper
     module ClassMacros
       def attributes(*attributes)
         return @attributes if attributes.empty?
-        @attributes = attributes + [:id]
+        @attributes = attributes
 
         @attributes.each do |attribute|
           define_singleton_method "find_by_#{attribute}" do |value|
