@@ -14,72 +14,68 @@ module EasyMapper
 					password: password)
 			end
 
-			def upsert(model, record, primary_keys)
-				columns = record.keys.map { |key| "\"#{key}\""}.join(', ')
-				placeholders = record.values.map.with_index { |_, i| "$#{i + 1}"}.join(', ')
+			def upsert(model, record, primary_keys: [])
+				placeholders = record.values.map { |value| escape(value) }.join(', ')
 
-				size = record.size
-				updates = record.keys
-					.reject { |key| primary_keys.include? key}
-					.map.with_index do |key, index|
-						"#{key} = $#{size + index + 1}"
+				updates = record
+					.reject { |key, _| primary_keys.include? key}
+					.map do |key, value|
+						"#{key} = #{escape(value)}"
 					end.join(', ')
 
-				prepared = """
+				query = """
 					INSERT INTO #{table_name(model)}
 					VALUES (#{placeholders})
 					ON CONFLICT (#{primary_keys.join(',')})
 					DO UPDATE SET #{updates}
 				"""
 
-				puts prepared
-				@connection.prepare('upsert_model', prepared)
-				@connection.exec_prepared('upsert_model',
-					record.values +
-					record.reject { |key, _| primary_keys.include? key}.values)
+				@connection.exec(query)
 			end
 
 			def insert(model, record)
 				columns = record.keys.map { |key| "\"#{key}\""}.join(', ')
-				placeholders = record.values.map.with_index { |_, i| "$#{i + 1}"}.join(', ')
-
-				prepared = """
+				placeholders = record.values.map { |value| escape(value) }.join(', ')
+				query = """
 					INSERT INTO #{table_name(model)} (#{columns})
 					VALUES (#{placeholders})
 				"""
 
-				@connection.prepare('new_model', prepared)
-				@connection.exec_prepared('new_model', record.values)
+				@connection.exec(query)
 			end
 
 			def delete(model, query)
-				where_clause = query.keys.map.with_index do |key, index|
-					"#{key} = $#{index + 1}"
+				where_clause = query.map do |key, value|
+					"#{key} = #{escape(value)}"
 				end.join(' AND ')
 
-				prepared = """
+				query = """
 					DELETE FROM #{table_name(model)}
 					WHERE #{where_clause}
 				"""
 
-				@connection.prepare('delete', prepared)
-				@connection.exec_prepared('delete', query.values)
+				@connection.exec(query)
 			end
 
-			def update(model, record)
-				updates = record.keys.map.with_index do |key, index|
-					"#{key} = $#{index + 1}"
-				end.join(' AND ')
+			def update(model, record, primary_keys: [])
+				updates = record
+					.reject { |key, _| primary_keys.include? key}
+					.map do |key, value|
+						"#{key} = #{escape(value)}"
+					end.join(', ')
 
-				prepared = """
+				pk_filter = primary_keys
+					.map { |key| "#{key} = #{escape(record[key])}"}
+					.join(' AND ')
+
+				query = """
 					UPDATE #{table_name(model)}
 					SET #{updates}
-					WHERE id = $#{record.size + 1}
+					WHERE #{pk_filter}
 				"""
-				puts prepared
-				@connection.prepare('update', prepared)
-				puts record.values + [record[:id]]
-				@connection.exec_prepared('update', record.values + [record[:id]])
+
+				puts query
+				@connection.exec(query)
 			end
 
 			def find(model, where, order_by, offset, limit)
@@ -102,6 +98,10 @@ module EasyMapper
 			end
 
 			private
+
+			def escape(value)
+				PG::Connection.quote_connstr(value)
+			end
 
 			def table_name(clazz)
 				clazz.table_name || generate_name(clazz)

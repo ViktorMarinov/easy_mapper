@@ -35,7 +35,18 @@ RSpec.describe EasyMapper do
 
     user.save
 
+    #TODO: search and check if the same
   end
 
+  it 'updates the record if id already exists' do
+    user = user_model.new(
+      id: 1,
+      first_name: 'Pesho',
+      last_name: 'Petrov',
+      age: 20)
 
+    user.save
+
+    #TODO: search and check if updated
+  end
 end

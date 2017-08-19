@@ -10,7 +10,7 @@ module EasyMapper
     end
 
     def upsert(record)
-      @adapter.upsert(@model, record, @model.primary_keys)
+      @adapter.upsert(@model, record, primary_keys: @model.primary_keys)
     end
 
     def create(record)
