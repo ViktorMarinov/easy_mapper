@@ -2,6 +2,7 @@ require_relative 'query'
 require_relative 'model/class_macros'
 require_relative 'model/query_methods'
 require_relative 'model/persistence'
+require_relative 'repository'
 
 module EasyMapper
   module Model
@@ -17,6 +18,8 @@ module EasyMapper
           end
         end
       end
+
+      cls.repository = Repository.new(cls)
     end
   end
 end

@@ -1,18 +1,12 @@
 require "spec_helper"
-require "easy_mapper/model"
+require "sqlite3"
 
-RSpec.describe EasyMapper do
-  it "has a version number" do
-    expect(EasyMapper::VERSION).not_to be nil
-  end
-
+RSpec.describe "EasyMapper integration" do
   let(:user_model) do
     Class.new do
       include EasyMapper::Model
 
-      table_name "Users"
-      attributes :id, :first_name, :last_name, :age
-      primary_keys :id
+      attributes :first_name, :last_name, :age
     end
   end
 
@@ -26,16 +20,13 @@ RSpec.describe EasyMapper do
     )
   end
 
-  it 'can save a record in the database' do
+  describe 'saves the record in the database' do
     user = user_model.new(
-      id: 1,
       first_name: 'Pesho',
       last_name: 'Petrov',
-      age: 17)
+      age: 15)
 
     user.save
-
   end
-
-
 end
+

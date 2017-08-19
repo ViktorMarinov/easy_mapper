@@ -1,13 +1,13 @@
 require_relative '../errors'
 
-module EasyMapper 
+module EasyMapper
   module Model
     module Persistence
       def save
-        if id
-          repository.update(@object)
+        puts "PKS ARE #{primary_keys}"
+        if has_pk
+          repository.upsert(@object)
         else
-          self.id = repository.next_id
           repository.create(@object)
         end
 
@@ -15,14 +15,24 @@ module EasyMapper
       end
 
       def delete
-        if id
-          repository.delete(id: id)
+        if has_pk
+          query = @object.select { |key, _| primary_keys.include? key }
         else
-          raise OhMapper::Errors::DeleteUnsavedRecordError
+          query = @object
         end
+
+        repository.delete(query)
       end
 
       private
+
+      def primary_keys
+        self.class.primary_keys
+      end
+
+      def has_pk
+        primary_keys && !primary_keys.empty?
+      end
 
       def repository
         self.class.repository

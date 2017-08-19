@@ -28,5 +28,13 @@ RSpec.describe "EasyMapper::Model" do
     expect(user.last_name ).to eq 'Petrov'
     expect(user.age).to eq 15
   end
+
+  # it 'has find_by methods' do
+  #   record = user_model.new(first_name: 'Ivan', last_name: 'Ivanov')
+  #   record.save
+
+  #   expect(user_model.find_by_first_name('Ivan').map(&:id)).to eq [record.id]
+  #   expect(user_model.find_by_last_name('Ivanov').map(&:id)).to eq [record.id]
+  # end
 end
 

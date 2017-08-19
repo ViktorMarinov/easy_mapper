@@ -24,6 +24,16 @@ module EasyMapper
       def repository=(repository)
         @repository = repository
       end
+
+      def primary_keys(*pk_list)
+        return @primary_keys if pk_list.empty?
+        @primary_keys = pk_list
+      end
+
+      def table_name(name = nil)
+        return @table_name if !name
+        @table_name = name
+      end
     end
   end
 end

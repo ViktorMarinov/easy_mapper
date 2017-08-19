@@ -2,6 +2,7 @@ module EasyMapper
   class Query
 	  include Enumerable
 
+    attr_accessor :model
     #builder methods
 
 	  def initialize(model)
