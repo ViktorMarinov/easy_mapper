@@ -4,7 +4,6 @@ module EasyMapper
   module Model
     module Persistence
       def save
-        puts "PKS ARE #{primary_keys}"
         if has_pk
           repository.upsert(@object)
         else

@@ -10,24 +10,42 @@ module EasyMapper
     end
 
     def upsert(record)
-      @adapter.upsert(@model, record, primary_keys: @model.primary_keys)
+      @adapter.upsert(table_name(@model), record, primary_keys: @model.primary_keys)
     end
 
     def create(record)
-      @adapter.insert(@model, record)
+      @adapter.insert(table_name(@model), record)
     end
 
     def find(query)
-      result_set = @adapter.find(@model, query)
+      result_set = @adapter.find(table_name(@model), query)
       #TODO: map to instances
     end
 
     def delete(query)
-      @adapter.delete(@model, query)
+      @adapter.delete(table_name(@model), query)
     end
 
     def update(query, kv_map)
-      @adapter.update(@model, kv_map)
+      @adapter.update(table_name(@model), kv_map)
+    end
+
+    private
+
+    def table_name(clazz)
+      clazz.table_name || generate_name(clazz)
+    end
+
+    def generate_name(clazz)
+      unless clazz.name
+        raise Errors::AnonymousClassError
+      end
+
+      if clazz.name[-1] == 's'
+        "#{clazz}es"
+      else
+        "#{clazz}s"
+      end
     end
   end
 end

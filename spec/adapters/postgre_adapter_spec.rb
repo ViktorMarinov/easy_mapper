@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'easy_mapper/adapters/postgre_adapter'
+require 'easy_mapper/model'
 
 RSpec.describe "EasyMapper::Adapters::PostgreAdapter" do
 
@@ -11,8 +12,6 @@ RSpec.describe "EasyMapper::Adapters::PostgreAdapter" do
     )
   end
 
-  let(:User) { Class.new }
-
   describe 'upsert' do
     it 'creates a new record if the primary key does not exist' do
       record = {
@@ -21,7 +20,15 @@ RSpec.describe "EasyMapper::Adapters::PostgreAdapter" do
         last_name: 'Petrov',
         age: 20
       }
-      adapter.upsert(User, record, )
+
+      adapter.upsert("Users", record, primary_keys: [:id])
+      result = adapter.find("Users").each do |row|
+        puts row
+      end
+    end
+
+    it 'updates the record if the primary key exists' do
+
     end
   end
 end

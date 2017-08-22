@@ -14,7 +14,7 @@ module EasyMapper
 					password: password)
 			end
 
-			def upsert(model, record, primary_keys: [])
+			def upsert(table, record, primary_keys: [])
 				placeholders = record.values.map { |value| escape(value) }.join(', ')
 
 				updates = record
@@ -24,40 +24,43 @@ module EasyMapper
 					end.join(', ')
 
 				query = """
-					INSERT INTO #{table_name(model)}
+					INSERT INTO #{table}
 					VALUES (#{placeholders})
 					ON CONFLICT (#{primary_keys.join(',')})
 					DO UPDATE SET #{updates}
 				"""
 
+				puts query
 				@connection.exec(query)
 			end
 
-			def insert(model, record)
+			def insert(table, record)
 				columns = record.keys.map { |key| "\"#{key}\""}.join(', ')
 				placeholders = record.values.map { |value| escape(value) }.join(', ')
 				query = """
-					INSERT INTO #{table_name(model)} (#{columns})
+					INSERT INTO #{table} (#{columns})
 					VALUES (#{placeholders})
 				"""
 
+				puts query
 				@connection.exec(query)
 			end
 
-			def delete(model, query)
+			def delete(table, query)
 				where_clause = query.map do |key, value|
 					"#{key} = #{escape(value)}"
 				end.join(' AND ')
 
 				query = """
-					DELETE FROM #{table_name(model)}
+					DELETE FROM #{table}
 					WHERE #{where_clause}
 				"""
 
+				puts query
 				@connection.exec(query)
 			end
 
-			def update(model, record, primary_keys: [])
+			def update(table, record, primary_keys: [])
 				updates = record
 					.reject { |key, _| primary_keys.include? key}
 					.map do |key, value|
@@ -69,7 +72,7 @@ module EasyMapper
 					.join(' AND ')
 
 				query = """
-					UPDATE #{table_name(model)}
+					UPDATE #{table}
 					SET #{updates}
 					WHERE #{pk_filter}
 				"""
@@ -78,8 +81,8 @@ module EasyMapper
 				@connection.exec(query)
 			end
 
-			def find(model, where, order_by, offset, limit)
-				query = "SELECT * FROM #{table_name(model)}"
+			def find(table, where: {}, order_by: {}, offset: nil, limit: nil)
+				query = "SELECT * FROM #{table}"
 
 				unless where.empty?
 					where_clause = where.map { |key, value| "#{key} = #{value}" }.join(' AND ')
@@ -94,29 +97,13 @@ module EasyMapper
 				query += "LIMIT #{limit}" if limit
 				query += "OFFSET #{offset}" if offset
 
-				puts query
+				@connection.exec(query)
 			end
 
 			private
 
 			def escape(value)
 				PG::Connection.quote_connstr(value)
-			end
-
-			def table_name(clazz)
-				clazz.table_name || generate_name(clazz)
-			end
-
-			def generate_name(clazz)
-				unless clazz.name
-					raise Errors::AnonymousClassError
-				end
-
-				if clazz.name[-1] == 's'
-					"#{clazz}es"
-				else
-					"#{clazz}s"
-				end
 			end
 		end
 	end
