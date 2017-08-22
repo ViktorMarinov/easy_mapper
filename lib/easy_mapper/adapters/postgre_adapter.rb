@@ -12,6 +12,8 @@ module EasyMapper
 					dbname: database,
 					user: user,
 					password: password)
+
+				@connection.type_map_for_results = PG::BasicTypeMapForResults.new(@connection)
 			end
 
 			def upsert(table, record, primary_keys: [])
@@ -30,7 +32,6 @@ module EasyMapper
 					DO UPDATE SET #{updates}
 				"""
 
-				puts query
 				@connection.exec(query)
 			end
 
@@ -46,17 +47,15 @@ module EasyMapper
 				@connection.exec(query)
 			end
 
-			def delete(table, query)
-				where_clause = query.map do |key, value|
-					"#{key} = #{escape(value)}"
-				end.join(' AND ')
+			def delete(table, where: {})
+				query = "DELETE FROM #{table}"
+				unless where.empty?
+					where_clause = where.map do |key, value|
+						"#{key} = #{escape(value)}"
+					end.join(' AND ')
+					query += " WHERE #{where_clause}" 
+				end
 
-				query = """
-					DELETE FROM #{table}
-					WHERE #{where_clause}
-				"""
-
-				puts query
 				@connection.exec(query)
 			end
 
@@ -85,7 +84,7 @@ module EasyMapper
 				query = "SELECT * FROM #{table}"
 
 				unless where.empty?
-					where_clause = where.map { |key, value| "#{key} = #{value}" }.join(' AND ')
+					where_clause = where.map { |key, value| "#{key} = '#{value}'" }.join(' AND ')
 					query += " WHERE #{where_clause}"
 				end
 
@@ -94,10 +93,12 @@ module EasyMapper
 					query += " ORDER BY #{order_by_clause}"
 				end
 
-				query += "LIMIT #{limit}" if limit
-				query += "OFFSET #{offset}" if offset
+				query += " LIMIT #{limit}" if limit
+				query += " OFFSET #{offset}" if offset
 
-				@connection.exec(query)
+				@connection.exec(query).map do |row|
+					row.map { |key, value| [key.to_sym, value] }.to_h
+				end
 			end
 
 			private
