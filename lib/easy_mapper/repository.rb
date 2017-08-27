@@ -19,14 +19,14 @@ module EasyMapper
 
     def find(query)
       result_set = @adapter.find(table_name(@model), query)
-      #TODO: map to instances
+      # TODO: map to instances
     end
 
     def delete(query)
       @adapter.delete(table_name(@model), query)
     end
 
-    def update(query, kv_map)
+    def update(_query, kv_map)
       @adapter.update(table_name(@model), kv_map)
     end
 
@@ -37,9 +37,7 @@ module EasyMapper
     end
 
     def generate_name(clazz)
-      unless clazz.name
-        raise Errors::AnonymousClassError
-      end
+      raise Errors::AnonymousClassError unless clazz.name
 
       if clazz.name[-1] == 's'
         "#{clazz}es"

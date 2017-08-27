@@ -1,6 +1,6 @@
-require "spec_helper"
+require 'spec_helper'
 
-RSpec.describe "EasyMapper::Query" do
+RSpec.describe 'EasyMapper::Query' do
   let(:user_model) do
     Class.new do
       include EasyMapper::Model
@@ -16,4 +16,3 @@ RSpec.describe "EasyMapper::Query" do
     end
   end
 end
-

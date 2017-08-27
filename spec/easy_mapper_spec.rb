@@ -1,8 +1,8 @@
-require "spec_helper"
-require "easy_mapper/model"
+require 'spec_helper'
+require 'easy_mapper/model'
 
 RSpec.describe EasyMapper do
-  it "has a version number" do
+  it 'has a version number' do
     expect(EasyMapper::VERSION).not_to be nil
   end
 
@@ -10,14 +10,14 @@ RSpec.describe EasyMapper do
     Class.new do
       include EasyMapper::Model
 
-      table_name "Users"
+      table_name 'Users'
       attributes :id, :first_name, :last_name, :age
       primary_keys :id
     end
   end
 
   before(:all) do
-    #TODO: auto start a test database
+    # TODO: auto start a test database
 
     EasyMapper::Config.adapter = EasyMapper::Adapters::PostgreAdapter.new(
       database: 'easy_mapper_test_db',
@@ -31,11 +31,12 @@ RSpec.describe EasyMapper do
       id: 1,
       first_name: 'Pesho',
       last_name: 'Petrov',
-      age: 17)
+      age: 17
+    )
 
     user.save
 
-    #TODO: search and check if the same
+    # TODO: search and check if the same
   end
 
   it 'updates the record if id already exists' do
@@ -43,10 +44,11 @@ RSpec.describe EasyMapper do
       id: 1,
       first_name: 'Pesho',
       last_name: 'Petrov',
-      age: 20)
+      age: 20
+    )
 
     user.save
 
-    #TODO: search and check if updated
+    # TODO: search and check if updated
   end
 end

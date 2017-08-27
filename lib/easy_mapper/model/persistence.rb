@@ -14,11 +14,11 @@ module EasyMapper
       end
 
       def delete
-        if has_pk
-          query = @object.select { |key, _| primary_keys.include? key }
-        else
-          query = @object
-        end
+        query = if has_pk
+                  @object.select { |key, _| primary_keys.include? key }
+                else
+                  @object
+                end
 
         repository.delete(query)
       end
@@ -39,4 +39,3 @@ module EasyMapper
     end
   end
 end
-

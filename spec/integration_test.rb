@@ -1,7 +1,7 @@
-require "spec_helper"
-require "sqlite3"
+require 'spec_helper'
+require 'sqlite3'
 
-RSpec.describe "EasyMapper integration" do
+RSpec.describe 'EasyMapper integration' do
   let(:user_model) do
     Class.new do
       include EasyMapper::Model
@@ -11,7 +11,7 @@ RSpec.describe "EasyMapper integration" do
   end
 
   before(:all) do
-    #TODO: auto start a test database
+    # TODO: auto start a test database
 
     EasyMapper::Config.adapter = EasyMapper::Adapters::PostgreAdapter.new(
       database: 'easy_mapper_test_db',
@@ -24,9 +24,9 @@ RSpec.describe "EasyMapper integration" do
     user = user_model.new(
       first_name: 'Pesho',
       last_name: 'Petrov',
-      age: 15)
+      age: 15
+    )
 
     user.save
   end
 end
-

@@ -7,4 +7,3 @@ module EasyMapper
     end
   end
 end
-

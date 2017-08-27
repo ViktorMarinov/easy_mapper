@@ -9,7 +9,7 @@ module EasyMapper
 
         @attributes.each do |attribute|
           define_singleton_method "find_by_#{attribute}" do |value|
-            objects.where({attribute => value})
+            objects.where(attribute => value)
           end
 
           define_method(attribute) { @object[attribute] }
@@ -31,10 +31,9 @@ module EasyMapper
       end
 
       def table_name(name = nil)
-        return @table_name if !name
+        return @table_name unless name
         @table_name = name
       end
     end
   end
 end
-

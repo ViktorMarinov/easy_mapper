@@ -1,15 +1,15 @@
 module EasyMapper
   class Query
-	  include Enumerable
+    include Enumerable
 
     attr_accessor :model
-    #builder methods
+    # builder methods
 
-	  def initialize(model)
+    def initialize(model)
       @model = model
       @where = {}
       @order_by = {}
-	  end
+    end
 
     def where(query)
       if @where
@@ -47,7 +47,7 @@ module EasyMapper
       self
     end
 
-    #kickers
+    # kickers
 
     def each(&block)
       execute_find.each(&block)
@@ -66,6 +66,5 @@ module EasyMapper
     def execute_find
       @model.repository.find(@where, @order_by, @offset, @limit)
     end
-	end
+  end
 end
-
