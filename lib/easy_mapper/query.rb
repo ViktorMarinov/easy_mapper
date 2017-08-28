@@ -2,13 +2,13 @@ module EasyMapper
   class Query
     include Enumerable
 
-    attr_accessor :model
+    attr_accessor :model, :where, :limit, :offset, :order
     # builder methods
 
     def initialize(model)
       @model = model
       @where = {}
-      @order_by = {}
+      @order = {}
     end
 
     def where(query)
@@ -25,11 +25,11 @@ module EasyMapper
       where({})
     end
 
-    def order_by(fields)
-      if @order_by
-        @order_by.merge!(fields)
+    def order(fields)
+      if @order
+        @order.merge!(fields)
       else
-        @order_by = fields
+        @order = fields
       end
 
       self
@@ -64,7 +64,7 @@ module EasyMapper
     private
 
     def execute_find
-      @model.repository.find(@where, @order_by, @offset, @limit)
+      @model.repository.find(@where, @order, @offset, @limit)
     end
   end
 end

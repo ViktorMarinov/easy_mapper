@@ -9,6 +9,20 @@ RSpec.describe 'EasyMapper::Model' do
     end
   end
 
+  describe 'id' do
+    it 'is auto added in the record' do
+      record = user_model.new
+
+      expect(record).to respond_to(:id)
+    end
+
+    it 'is nil if the record is not saved' do
+      record = user_model.new
+
+      expect(record.id).to be nil
+    end
+  end
+
   it 'creates attribute accessors' do
     record = user_model.new
     record.first_name = 'Pesho'
@@ -30,11 +44,12 @@ RSpec.describe 'EasyMapper::Model' do
     expect(user.age).to eq 15
   end
 
-  # it 'has find_by methods' do
-  #   record = user_model.new(first_name: 'Ivan', last_name: 'Ivanov')
-  #   record.save
+  it 'has find_by methods' do
+    record = user_model.new(first_name: 'Ivan', last_name: 'Ivanov')
 
-  #   expect(user_model.find_by_first_name('Ivan').map(&:id)).to eq [record.id]
-  #   expect(user_model.find_by_last_name('Ivanov').map(&:id)).to eq [record.id]
-  # end
+    expect(user_model).to respond_to(:find_by_id).with(1).arguments
+    expect(user_model).to respond_to(:find_by_first_name).with(1).arguments
+    expect(user_model).to respond_to(:find_by_last_name).with(1).arguments
+    expect(user_model).to respond_to(:find_by_age).with(1).arguments
+  end
 end
