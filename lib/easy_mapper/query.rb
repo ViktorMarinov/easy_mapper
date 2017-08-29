@@ -2,8 +2,8 @@ module EasyMapper
   class Query
     include Enumerable
 
-    attr_accessor :model, :where, :limit, :offset, :order
-    # builder methods
+    attr_accessor :model
+
 
     def initialize(model)
       @model = model
@@ -11,7 +11,9 @@ module EasyMapper
       @order = {}
     end
 
-    def where(query)
+    def where(query = nil)
+      return @where unless query
+
       if @where
         @where.merge!(query)
       else
@@ -25,7 +27,9 @@ module EasyMapper
       where({})
     end
 
-    def order(fields)
+    def order(fields = nil)
+      return @order unless fields
+
       if @order
         @order.merge!(fields)
       else
@@ -35,13 +39,17 @@ module EasyMapper
       self
     end
 
-    def limit(value)
+    def limit(value = nil)
+      return @limit unless value
+
       @limit = value
 
       self
     end
 
-    def offset(value)
+    def offset(value = nil)
+      return @offset unless value
+
       @offset = value
 
       self
@@ -49,22 +57,38 @@ module EasyMapper
 
     # kickers
 
+    def exec
+      execute_find
+    end
+
     def each(&block)
       execute_find.each(&block)
     end
 
     def count(field)
-      @model.repository.count(field)
+      raise NotImplementedError
+    end
+
+    def avg(field)
+      raise NotImplementedError
     end
 
     def inspect
       execute_find.inspect
     end
 
+    def delete_all
+      @model.repository.delete({})
+    end
+
     private
 
     def execute_find
-      @model.repository.find(@where, @order, @offset, @limit)
+      map_to_model_instances @model.repository.find(self)
+    end
+
+    def map_to_model_instances(records)
+      records.map { |record| @model.new(record) }
     end
   end
 end

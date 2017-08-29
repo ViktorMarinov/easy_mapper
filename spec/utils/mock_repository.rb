@@ -2,34 +2,34 @@ class MockRepository
   attr_reader :storage
 
   def initialize
-    @storage = []
+    @storage = {}
+    @id_counter = 0
+  end
+
+  def next_id
+    @id_counter += 1
   end
 
   def create(record)
-    @storage << record
+    @storage[record[:id]] = record
   end
 
   def find(query)
-    @storage.select { |record| match_record? query, record }
-  end
-
-  def delete(query)
-    @storage.reject! { |record| match_record? query, record }
-  end
-
-  def update(query, kv_map)
-    find(query).each do |entry|
-      kv_map.each do |key, value|
-        if entry.respond_to? "#{key}=" do
-          entry.send("#{key}=", value)
-        end
-      end
+    @storage.values.select do |record|
+      query.where.all? { |key, value| record[key] == value }
     end
   end
 
-  private
+  def delete(query)
+    records = @storage.values.select do |record|
+      query.all? { |key, value| record[key] == value }
+    end
 
-  def match_record?(query, record)
-    query.all? { |key, value| record[key] == value }
+    records.each { |record| @storage.delete(record[:id]) }
+  end
+
+  def update(id, record)
+    return unless @storage.key? id
+    @storage[id] = record
   end
 end

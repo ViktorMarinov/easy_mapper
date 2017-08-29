@@ -1,11 +1,14 @@
 require 'spec_helper'
 
+require_relative 'utils/mock_repository'
+
 RSpec.describe 'EasyMapper::Model' do
   let(:user_model) do
     Class.new do
       include EasyMapper::Model
 
       attributes :first_name, :last_name, :age
+      repository MockRepository.new
     end
   end
 
@@ -20,6 +23,13 @@ RSpec.describe 'EasyMapper::Model' do
       record = user_model.new
 
       expect(record.id).to be nil
+    end
+
+    it 'is not nil after the record is saved' do
+      record = user_model.new
+      record.save
+
+      expect(record.id).not_to be nil
     end
   end
 
@@ -44,12 +54,61 @@ RSpec.describe 'EasyMapper::Model' do
     expect(user.age).to eq 15
   end
 
-  it 'has find_by methods' do
+  it 'has #find_by methods' do
     record = user_model.new(first_name: 'Ivan', last_name: 'Ivanov')
 
     expect(user_model).to respond_to(:find_by_id).with(1).arguments
     expect(user_model).to respond_to(:find_by_first_name).with(1).arguments
     expect(user_model).to respond_to(:find_by_last_name).with(1).arguments
     expect(user_model).to respond_to(:find_by_age).with(1).arguments
+  end
+
+  it 'has #objects method for building queries' do
+    expect(user_model).to respond_to(:objects).with(0).arguments
+  end
+
+  describe 'equality comparison' do
+    it 'compares by id if both records are saved' do
+      ivan = user_model.new(first_name: 'Ivan')
+      ivan.save
+
+      petar = user_model.new(first_name: 'Petar')
+      petar.save
+
+      expect(ivan).to_not eq petar
+      expect(ivan).to eq ivan
+
+      modified_ivan = user_model.objects.where(id: ivan.id).first
+      modified_ivan.first_name = 'Gosho'
+
+      expect(ivan).to eq modified_ivan
+    end
+
+    it 'uses #equal? if there are no ids' do
+      first_user  = user_model.new(first_name: 'Ivan')
+      second_user = user_model.new(first_name: 'Ivan')
+
+      expect(first_user).to_not eq second_user
+      expect(first_user).to eq first_user
+    end
+  end
+
+  describe '#delete' do
+    it 'deletes only the record for which it is called' do
+      ivan = user_model.new(first_name: 'Ivan').save
+      user_model.new(first_name: 'Petar').save
+      user_model.new(first_name: 'Georgi').save
+
+      ivan.delete
+
+      # all_records = user_model.objects.where({}).map(&:first_name)
+      # expect(all_records).to match_array ['Petar', 'Georgi']
+    end
+
+    it 'raises an error if the record is not saved' do
+      expect { user_model.new(first_name: 'Ivan').delete }.to raise_error(
+        EasyMapper::Errors::DeleteUnsavedRecordError
+      )
+    end
   end
 end

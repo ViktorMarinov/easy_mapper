@@ -1,3 +1,5 @@
+require_relative 'db_repository'
+
 module EasyMapper
   module Config
     class << self

@@ -1,15 +1,17 @@
 require_relative 'query'
 require_relative 'model/class_macros'
 require_relative 'model/query_methods'
-require_relative 'model/persistence'
 require_relative 'db_repository'
+require_relative 'errors'
 
 module EasyMapper
   module Model
     def self.included(cls)
       cls.extend ClassMacros
       cls.extend QueryMethods
-      cls.include Persistence
+
+      db_adapter = EasyMapper::Config.db_adapter
+      cls.repository EasyMapper::DbRepository.new(cls, db_adapter)
 
       cls.class_exec do
         def initialize(initial_values = {})
@@ -19,8 +21,37 @@ module EasyMapper
         end
       end
 
-      db_adapter = EasyMapper::Config.db_adapter
-      cls.repository = DbRepository.new(cls, db_adapter)
+      def save
+        if id
+          repository.update(id, @object)
+        else
+          @object[:id] = repository.next_id
+          repository.create(@object)
+        end
+
+        self
+      end
+
+      def delete
+        raise Errors::DeleteUnsavedRecordError unless id
+
+        repository.delete(id: id)
+      end
+
+      def ==(other)
+        return id == other.id if id && other.id
+        equal? other
+      end
+
+      private
+
+      def primary_keys
+        self.class.primary_keys
+      end
+
+      def repository
+        self.class.repository
+      end
     end
   end
 end

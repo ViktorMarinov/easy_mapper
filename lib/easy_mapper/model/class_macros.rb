@@ -17,11 +17,9 @@ module EasyMapper
         end
       end
 
-      def repository
-        @repository
-      end
+      def repository(repository = nil)
+        return @repository unless repository
 
-      def repository=(repository)
         @repository = repository
       end
 

@@ -26,13 +26,6 @@ RSpec.describe 'EasyMapper::Adapters::PostgreAdapter' do
     end
   end
 
-  describe 'execute' do
-    it 'can execute a simple query' do
-      result = @adapter.execute("SELECT 1,2")
-      expect(result.values).to eq [[1, 2]]
-    end
-  end
-
   describe 'escape' do
     it 'escapes the string properly' do
       expect(@adapter.escape("' or ''='")).to eq "'' or ''''=''"

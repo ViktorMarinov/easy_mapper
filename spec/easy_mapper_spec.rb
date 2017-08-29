@@ -12,43 +12,48 @@ RSpec.describe EasyMapper do
 
       table_name 'Users'
       attributes :id, :first_name, :last_name, :age
-      primary_keys :id
     end
   end
 
-  # before(:all) do
-  #   # TODO: auto start a test database
+  before(:all) do
+    # TODO: auto start a test database
 
-  #   EasyMapper::Config.adapter = EasyMapper::Adapters::PostgreAdapter.new(
-  #     database: 'easy_mapper_test_db',
-  #     user: 'easy_mapper_user',
-  #     password: ''
-  #   )
-  # end
+    EasyMapper::Config.db_adapter = EasyMapper::Adapters::PostgreAdapter.new(
+      database: 'easy_mapper_test_db',
+      user: 'easy_mapper_user',
+      password: ''
+    )
+  end
 
-  # it 'can save a record in the database' do
-  #   user = user_model.new(
-  #     id: 1,
-  #     first_name: 'Pesho',
-  #     last_name: 'Petrov',
-  #     age: 17
-  #   )
+  before(:each) do
+    user_model.objects.delete_all
+  end
 
-  #   user.save
+  it 'can save a record in the database' do
+    user = user_model.new(
+      first_name: 'Pesho',
+      last_name: 'Petrov',
+      age: 17
+    )
 
-  #   # TODO: search and check if the same
-  # end
+    user.save
 
-  # it 'updates the record if id already exists' do
-  #   user = user_model.new(
-  #     id: 1,
-  #     first_name: 'Pesho',
-  #     last_name: 'Petrov',
-  #     age: 20
-  #   )
+    actual = user_model.objects.where(first_name: 'Pesho').exec
+    expect(actual).to match_array [user]
+  end
 
-  #   user.save
+  it 'updates the record if id already exists' do
+    user = user_model.new(
+      first_name: 'Pesho',
+      last_name: 'Petrov',
+      age: 20
+    )
 
-  #   # TODO: search and check if updated
-  # end
+    user.save
+    user.age = 21
+    user.save
+
+    actual = user_model.objects.where(id: user.id).exec
+    expect(actual).to eq [user]
+  end
 end
