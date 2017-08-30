@@ -52,11 +52,22 @@ module EasyMapper
       sql_builder.offset(escape(query.offset)) if query.offset
 
       sql_query = sql_builder.build
-      @db_adapter.execute(sql_query)
+      @db_adapter.execute(sql_query).list
     end
 
     def next_id
       @db_adapter.next_id(@model.table_name)
+    end
+
+    def aggregate(aggregation, field, where_clause)
+      sql_builder = @sql.select
+                      .from(@model.table_name)
+                      .column("#{aggregation}(#{field})")
+
+      sql_builder.where(escape_values(where_clause)) unless where_clause.empty?
+
+      sql_query = sql_builder.build
+      @db_adapter.execute(sql_query).single_value
     end
 
     private

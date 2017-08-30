@@ -1,6 +1,8 @@
 require 'pg'
 require 'sqlbuilder'
 
+require_relative 'results/postgre_result'
+
 module EasyMapper
   module Adapters
     class PostgreAdapter
@@ -29,7 +31,11 @@ module EasyMapper
       end
 
       def execute(query)
-        map_result @connection.exec(query)
+        PostgreResult.new @connection.exec(query)
+      end
+
+      def single_result(result)
+
       end
 
       def escape(value)
@@ -50,15 +56,7 @@ module EasyMapper
         execute(sql_builder.sequence(seq_name).create_unless_exists)
 
         query = sql_builder.sequence(seq_name).next_val
-        execute(query)[0][:nextval]
-      end
-
-      private
-
-      def map_result(result)
-        result.map do |row|
-          row.map { |key, value| [key.to_sym, value] }.to_h
-        end
+        execute(query).single_value
       end
     end
   end

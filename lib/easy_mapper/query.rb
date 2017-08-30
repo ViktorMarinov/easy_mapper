@@ -4,6 +4,9 @@ module EasyMapper
 
     attr_accessor :model
 
+    """
+    builder methods
+    """
 
     def initialize(model)
       @model = model
@@ -55,26 +58,38 @@ module EasyMapper
       self
     end
 
-    # kickers
+
+    """
+    kickers
+    """
+
+    def single_result
+      #TODO: return single result, raise exception if none or more
+      exec
+    end
 
     def exec
-      execute_find
+      map_to_model_instances @model.repository.find(self)
     end
 
     def each(&block)
-      execute_find.each(&block)
+      exec.each(&block)
     end
 
-    def count(field)
-      raise NotImplementedError
+    def count(field = '*')
+      @model.repository.aggregate("COUNT", field, @where)
     end
 
     def avg(field)
-      raise NotImplementedError
+       @model.repository.aggregate("AVG", field, @where).to_f
+    end
+
+    def sum(field)
+      @model.repository.aggregate("SUM", field, @where)
     end
 
     def inspect
-      execute_find.inspect
+      exec.inspect
     end
 
     def delete_all
@@ -82,10 +97,6 @@ module EasyMapper
     end
 
     private
-
-    def execute_find
-      map_to_model_instances @model.repository.find(self)
-    end
 
     def map_to_model_instances(records)
       records.map { |record| @model.new(record) }

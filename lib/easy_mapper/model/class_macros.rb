@@ -9,7 +9,7 @@ module EasyMapper
 
         @attributes.each do |attribute|
           define_singleton_method "find_by_#{attribute}" do |value|
-            objects.where(attribute => value)
+            objects.where(attribute => value).exec
           end
 
           define_method(attribute) { @object[attribute] }
