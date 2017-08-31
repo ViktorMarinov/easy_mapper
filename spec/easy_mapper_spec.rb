@@ -249,7 +249,7 @@ RSpec.describe EasyMapper do
         expect(address.id).not_to be_nil
       end
 
-      it 'instantiates owned models after find' do
+      it 'instantiates the associated objects after find' do
         address = @address_model.new(city: 'Sofia', street: 'Notreal Str.')
         employee = @employee_model.new(name: 'pesho', address: address)
         employee.save
@@ -291,6 +291,18 @@ RSpec.describe EasyMapper do
         ).save
 
         expect(@phone_entry.objects).to match_array [pesho, gosho]
+      end
+
+      it 'instantiates the associated objects on find' do
+        gosho = @phone_entry.new(name: 'Gosho', phone: '0885857378')
+        pesho = @phone_entry.new(name: 'Pesho', phone: '0874537563')
+        id = @phone_book.new(
+          county: 'Bulgaria',
+          phone_entries: [gosho, pesho]
+        ).save.id
+
+        result = @phone_book.find_by_id(id).first
+        expect(result.phone_entries).to match_array [pesho, gosho]
       end
     end
   end
