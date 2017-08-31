@@ -65,7 +65,7 @@ module EasyMapper
 
     def single_result
       #TODO: return single result, raise exception if none or more
-      exec
+      exec.first
     end
 
     def exec
@@ -99,7 +99,20 @@ module EasyMapper
     private
 
     def map_to_model_instances(records)
-      records.map { |record| @model.new(record) }
+      records.map do |record|
+        associations = @model.has_one_assoc.map do |assoc|
+          assoc_record = record
+            .select { |key, _| key.to_s.include? "#{assoc.name}_" }
+            .map { |k, v| [k.to_s.gsub("#{assoc.name}_", "").to_sym, v] }
+            .to_h
+          [
+            assoc.name,
+            assoc.cls.new(assoc_record)
+          ]
+        end
+
+        @model.new(record.merge(associations.to_h))
+      end
     end
   end
 end

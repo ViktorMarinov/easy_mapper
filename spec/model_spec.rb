@@ -111,4 +111,62 @@ RSpec.describe 'EasyMapper::Model' do
       )
     end
   end
+
+  describe 'associations' do
+    before(:each) do
+      @address_model = Class.new do
+        include EasyMapper::Model
+
+        attributes :city, :street
+      end
+
+      @employee_model = Class.new do
+        include EasyMapper::Model
+
+        attributes :name
+        has_one :address, cls: @address_model
+        repository MockRepository.new
+      end
+
+      @address_book_model = Class.new do
+        include EasyMapper::Model
+
+        attributes :price
+        has_many :addresses, cls: @address_model
+      end
+    end
+
+    it 'creates attribute accessor for #has_one associations' do
+      address = @address_model.new(city: 'Sofia', street: 'Notreal Str.')
+      employee = @employee_model.new(name: 'pesho')
+      employee.address = address
+
+      expect(employee.address).to be address
+    end
+
+    it 'creates attribute accessor for #has_many associations' do
+      address1 = @address_model.new(city: 'Sofia', street: 'Notreal Str.')
+      address2 = @address_model.new(city: 'London', street: 'Real Str.')
+      book = @address_book_model.new(price: 15)
+      book.addresses = [address1, address2]
+
+      expect(book.addresses).to match_array [address1, address2]
+    end
+
+    it 'can pass initial values for associations on init' do
+      address1 = @address_model.new(city: 'Sofia', street: 'Notreal Str.')
+      address2 = @address_model.new(city: 'London', street: 'Real Str.')
+      book = @address_book_model.new(
+        price: 15,
+        addresses: [address1, address2])
+
+      expect(book.addresses).to match_array [address1, address2]
+    end
+
+    it 'initializes has_many attribute with empty list' do
+      book = @address_book_model.new(price: 15)
+
+      expect(book.addresses).to be_empty
+    end
+  end
 end

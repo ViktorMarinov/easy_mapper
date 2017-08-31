@@ -44,7 +44,10 @@ module EasyMapper
 
     def find(query)
       sql_builder = @sql.select
-                .from(@model.table_name)
+                .column('model.*')
+                .from(@model.table_name, aliaz: 'model')
+
+      build_join(sql_builder)
 
       sql_builder.where(escape_values(query.where)) unless query.where.empty?
       sql_builder.order(escape_values(query.order)) unless query.order.empty?
@@ -71,6 +74,21 @@ module EasyMapper
     end
 
     private
+
+    def build_join(sql_builder)
+      @model.has_one_assoc.each do |assoc|
+        column = assoc.id_column.to_sym
+
+        assoc.cls.attributes.each do |attr|
+          sql_builder.column(
+            "#{assoc.name}.#{attr}",
+            as: "#{assoc.name}_#{attr}"
+          )
+        end
+
+        sql_builder.join(assoc.cls.table_name, on: {column => :id})
+      end
+    end
 
     def escape(value)
       @db_adapter.escape(value)

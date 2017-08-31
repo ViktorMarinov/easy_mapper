@@ -206,6 +206,94 @@ RSpec.describe EasyMapper do
       expect(user_model.objects.sum(:age)).to be (30 + 40 + 52)
     end
   end
+
+  describe 'associations' do
+    describe '#has_one' do
+      before(:all) do
+        address_model = Class.new do
+          include EasyMapper::Model
+
+          attributes :city, :street
+          table_name "address"
+        end
+
+        @employee_model = Class.new do
+          include EasyMapper::Model
+
+          attributes :name
+          has_one :address, cls: address_model
+          table_name "employee"
+        end
+
+        @address_model = address_model
+      end
+
+      before(:each) do
+        @employee_model.objects.delete_all
+        @address_model.objects.delete_all
+      end
+
+      it 'saves the associated objects when the owner is saved' do
+        address = @address_model.new(city: 'Sofia', street: 'Notreal Str.')
+        employee = @employee_model.new(name: 'pesho', address: address)
+        employee.save
+
+        expect(@address_model.objects.first).to eq employee.address
+      end
+
+      it 'updates the id column of the owned model' do
+        address = @address_model.new(city: 'Sofia', street: 'Notreal Str.')
+        employee = @employee_model.new(name: 'pesho', address: address)
+        employee.save
+
+        expect(address.id).not_to be_nil
+      end
+
+      it 'instantiates owned models after find' do
+        address = @address_model.new(city: 'Sofia', street: 'Notreal Str.')
+        employee = @employee_model.new(name: 'pesho', address: address)
+        employee.save
+
+        found_emp = @employee_model.find_by_name('pesho').first
+        expect(found_emp.address).to eq address
+      end
+    end
+
+    describe '#has_many' do
+      before(:all) do
+        @phone_entry = Class.new do
+          include EasyMapper::Model
+
+          attributes :name, :phone
+          table_name "phone_entry"
+        end
+
+        @phone_book = Class.new do
+          include EasyMapper::Model
+
+          attributes :country
+          has_many :phone_entries, cls: @phone_entry, mapped_by: :phone_book_id
+          table_name "phone_book"
+        end
+      end
+
+      before(:each) do
+        @phone_entry.objects.delete_all
+        @phone_book.objects.delete_all
+      end
+
+      it 'saves the associated objects when the owner is saved' do
+        gosho = @phone_entry.new(name: 'Gosho', phone: '0885857378')
+        pesho = @phone_entry.new(name: 'Pesho', phone: '0874537563')
+        book = @phone_book.new(
+          county: 'Bulgaria',
+          phone_entries: [gosho, pesho]
+        ).save
+
+        expect(@phone_entry.objects).to match_array [pesho, gosho]
+      end
+    end
+  end
 end
 
 
