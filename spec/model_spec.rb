@@ -153,6 +153,15 @@ RSpec.describe 'EasyMapper::Model' do
       expect(book.addresses).to match_array [address1, address2]
     end
 
+    # it 'creates accessors for #belongs_to associations' do
+    #   address1 = @address_model.new(city: 'Sofia', street: 'Notreal Str.')
+    #   address2 = @address_model.new(city: 'London', street: 'Real Str.')
+    #   book = @address_book_model.new(price: 15)
+    #   book.addresses = [address1, address2]
+
+    #   expect(book.addresses).to match_array [address1, address2]
+    # end
+
     it 'can pass initial values for associations on init' do
       address1 = @address_model.new(city: 'Sofia', street: 'Notreal Str.')
       address2 = @address_model.new(city: 'London', street: 'Real Str.')

@@ -19,14 +19,14 @@ module EasyMapper
             self.class.attributes.include? key
           end
 
-          all_associations = has_one_assoc + has_many_assoc
+          all_associations = associations_to_one + associations_to_many
           defined_assoc_names = all_associations.map { |assoc| assoc.name }
 
           @associations = initial_values.select do |key, _|
             defined_assoc_names.include? key
           end
 
-          has_many_assoc
+          associations_to_many
             .reject { |assoc| initial_values.include? assoc.name }
             .each do |assoc|
               @associations[assoc.name] = []
@@ -35,9 +35,9 @@ module EasyMapper
       end
 
       def save
-        has_one_assoc.each do |assoc|
-          result = @associations[assoc.name].save
-          @object[assoc.id_column] = result.id
+        associations_to_one.each do |assoc_to_one|
+          result = @associations[assoc_to_one.name].save
+          @object[assoc_to_one.id_column] = result.id
         end
 
         if id
@@ -47,9 +47,11 @@ module EasyMapper
           repository.create(@object)
         end
 
-        has_many_assoc.each do |assoc|
-          association = @associations[assoc.name]
-          @associations[assoc.name] = association.map { |model| model.save }
+        associations_to_many.each do |assoc_to_many|
+          @associations[assoc_to_many.name].each do |model|
+            model.public_send "#{assoc_to_many.mapped_by}=", id
+            model.save
+          end
         end
 
         self
@@ -76,12 +78,12 @@ module EasyMapper
         self.class.repository
       end
 
-      def has_many_assoc
-        self.class.has_many_assoc
+      def associations_to_many
+        self.class.associations_to_many
       end
 
-      def has_one_assoc
-        self.class.has_one_assoc
+      def associations_to_one
+        self.class.associations_to_one
       end
     end
   end

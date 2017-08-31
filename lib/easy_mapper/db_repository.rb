@@ -76,7 +76,7 @@ module EasyMapper
     private
 
     def build_join(sql_builder)
-      @model.has_one_assoc.each do |assoc|
+      @model.associations_to_one.each do |assoc|
         column = assoc.id_column.to_sym
 
         assoc.cls.attributes.each do |attr|

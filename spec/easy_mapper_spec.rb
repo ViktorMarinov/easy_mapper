@@ -261,20 +261,25 @@ RSpec.describe EasyMapper do
 
     describe '#has_many' do
       before(:all) do
-        @phone_entry = Class.new do
-          include EasyMapper::Model
-
-          attributes :name, :phone
-          table_name "phone_entry"
-        end
+        phone_entry = Class.new
 
         @phone_book = Class.new do
           include EasyMapper::Model
 
           attributes :country
-          has_many :phone_entries, cls: @phone_entry, mapped_by: :phone_book_id
+          has_many :phone_entries, cls: phone_entry, mapped_by: :phone_book_id
           table_name "phone_book"
         end
+
+        phone_entry.class_exec do
+          include EasyMapper::Model
+
+          attributes :name, :phone
+          belongs_to @phone_book, attr_name: :phone_book
+          table_name "phone_entry"
+        end
+
+        @phone_entry = phone_entry
       end
 
       before(:each) do

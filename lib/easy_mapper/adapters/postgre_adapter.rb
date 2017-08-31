@@ -31,6 +31,7 @@ module EasyMapper
       end
 
       def execute(query)
+        puts "EXECUTING: #{query}"
         PostgreResult.new @connection.exec(query)
       end
 
