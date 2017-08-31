@@ -34,10 +34,6 @@ module EasyMapper
         PostgreResult.new @connection.exec(query)
       end
 
-      def single_result(result)
-
-      end
-
       def escape(value)
         if value.kind_of? String
           PG::Connection.escape_string(value)
