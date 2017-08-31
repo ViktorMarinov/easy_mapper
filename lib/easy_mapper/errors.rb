@@ -1,18 +1,22 @@
 module EasyMapper
   module Errors
-    class DeleteUnsavedRecordError < StandardError
+
+    class EasyMapperError < StandardError
     end
 
-    class UnknownAttributeError < StandardError
+    class DeleteUnsavedRecordError < EasyMapperError
+    end
+
+    class UnknownAttributeError < EasyMapperError
       def initialize(attribute_name)
         super "Unknown attribute #{attribute_name}"
       end
     end
 
-    class NoDatabaseConnectionError < StandardError
+    class NoDatabaseConnectionError < EasyMapperError
     end
 
-    class AnonymousClassError < StandardError
+    class AnonymousClassError < EasyMapperError
       def initialize
         super 'Anonymous classes must provide a table name'
       end
