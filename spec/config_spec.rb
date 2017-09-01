@@ -4,7 +4,6 @@ require 'easy_mapper/config'
 require 'easy_mapper/db_repository'
 
 RSpec.describe 'EasyMapper::Config' do
-
   let(:adapter) do
     EasyMapper::Adapters::PostgreAdapter.new(
       database: 'easy_mapper_test_db',

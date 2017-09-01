@@ -167,7 +167,8 @@ RSpec.describe 'EasyMapper::Model' do
       address2 = @address_model.new(city: 'London', street: 'Real Str.')
       book = @address_book_model.new(
         price: 15,
-        addresses: [address1, address2])
+        addresses: [address1, address2]
+      )
 
       expect(book.addresses).to match_array [address1, address2]
     end

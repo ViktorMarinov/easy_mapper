@@ -1,7 +1,7 @@
 module EasyMapper
   module Adapters
     module Results
-      class PostgreResult
+      class SqliteResult
         def initialize(result)
           @result = result
         end
@@ -11,16 +11,20 @@ module EasyMapper
         end
 
         def single_value
-          @result.values.first.first
+          values.first.first
         end
 
         def values
-          @result.values
+          @result.map(&:values)
         end
 
         def list
           @result.map do |row|
-            row.map { |key, value| [key.to_sym, value] }.to_h
+            row.map do |key, value|
+              key = key.to_sym if key.is_a? String
+
+              [key, value]
+            end.to_h
           end
         end
       end

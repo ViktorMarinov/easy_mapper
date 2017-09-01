@@ -13,7 +13,7 @@ module EasyMapper
           database:,
           user:,
           password:
-        )
+      )
 
         @connection_options = {
           host: host,
@@ -37,7 +37,7 @@ module EasyMapper
 
       def execute(query)
         Logger.logger.info("Executing query: #{query}")
-        PostgreResult.new @connection.exec(query)
+        Results::PostgreResult.new @connection.exec(query)
       end
 
       def sql_builder

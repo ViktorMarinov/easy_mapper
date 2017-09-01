@@ -1,6 +1,5 @@
 module EasyMapper
   module Errors
-
     class EasyMapperError < StandardError
     end
 

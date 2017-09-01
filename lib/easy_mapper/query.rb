@@ -4,9 +4,9 @@ module EasyMapper
 
     attr_accessor :model
 
-    """
+    ''"
     builder methods
-    """
+    "''
 
     def initialize(model)
       @model = model
@@ -54,10 +54,9 @@ module EasyMapper
       self
     end
 
-
-    """
+    ''"
     kickers
-    """
+    "''
 
     def exec
       map_to_model_instances @model.repository.find(self)
@@ -68,7 +67,7 @@ module EasyMapper
     end
 
     def single_result
-      #TODO: return single result, raise exception if none or more
+      # TODO: return single result, raise exception if none or more
       exec.first
     end
 
@@ -77,15 +76,15 @@ module EasyMapper
     end
 
     def count(field = '*')
-      @model.repository.aggregate("COUNT", field, @where)
+      @model.repository.aggregate('COUNT', field, @where)
     end
 
     def avg(field)
-       @model.repository.aggregate("AVG", field, @where).to_f
+      @model.repository.aggregate('AVG', field, @where).to_f
     end
 
     def sum(field)
-      @model.repository.aggregate("SUM", field, @where)
+      @model.repository.aggregate('SUM', field, @where)
     end
 
     def inspect
@@ -101,7 +100,7 @@ module EasyMapper
     def map_to_model_instances(records)
       records.map do |record|
         associations = map_associations_to_many(record)
-                        .merge(map_associations_to_one(record))
+                       .merge(map_associations_to_one(record))
 
         @model.new(record.merge(associations))
       end
@@ -119,9 +118,9 @@ module EasyMapper
     def map_associations_to_one(record)
       @model.associations_to_one.map do |assoc|
         assoc_record = record
-          .select { |key, _| key.to_s.include? "#{assoc.name}." }
-          .map { |k, v| [k.to_s.gsub("#{assoc.name}.", "").to_sym, v] }
-          .to_h
+                       .select { |key, _| key.to_s.include? "#{assoc.name}." }
+                       .map { |k, v| [k.to_s.gsub("#{assoc.name}.", '').to_sym, v] }
+                       .to_h
         [
           assoc.name,
           assoc.cls.new(assoc_record)

@@ -20,7 +20,7 @@ module EasyMapper
           end
 
           all_associations = associations_to_one + associations_to_many
-          defined_assoc_names = all_associations.map { |assoc| assoc.name }
+          defined_assoc_names = all_associations.map(&:name)
 
           @associations = initial_values.select do |key, _|
             defined_assoc_names.include? key
@@ -61,9 +61,7 @@ module EasyMapper
         raise Errors::DeleteUnsavedRecordError unless id
 
         associations_to_many.each do |assoc_to_many|
-          @associations[assoc_to_many.name].each do |model|
-            model.delete
-          end
+          @associations[assoc_to_many.name].each(&:delete)
         end
 
         repository.delete(id: id)

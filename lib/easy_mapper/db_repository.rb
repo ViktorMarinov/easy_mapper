@@ -14,38 +14,38 @@ module EasyMapper
 
     def create(record)
       query = @sql.insert
-                .into(@model.table_name)
-                .record(record)
-                .build
+                  .into(@model.table_name)
+                  .record(record)
+                  .build
 
       @db_adapter.execute(query)
     end
 
     def delete(query_filters)
       query = @sql.delete
-                .from(@model.table_name)
-                .where(query_filters)
-                .build
+                  .from(@model.table_name)
+                  .where(query_filters)
+                  .build
 
       @db_adapter.execute(query)
     end
 
     def update(id, record)
-      values_to_update = record.reject { |key, value| key.eql? :id }.to_h
+      values_to_update = record.reject { |key, _value| key.eql? :id }.to_h
 
       query = @sql.update
-                .table(@model.table_name)
-                .where(id: id)
-                .set(values_to_update)
-                .build
+                  .table(@model.table_name)
+                  .where(id: id)
+                  .set(values_to_update)
+                  .build
 
       @db_adapter.execute(query)
     end
 
     def find(query)
       sql_builder = @sql.select
-                .column('*', from: 'model')
-                .from(@model.table_name, aliaz: 'model')
+                        .column('*', from: 'model')
+                        .from(@model.table_name, aliaz: 'model')
 
       build_join(sql_builder)
 
@@ -64,8 +64,8 @@ module EasyMapper
 
     def aggregate(aggregation, field, where_clause)
       sql_builder = @sql.select
-                      .from(@model.table_name)
-                      .aggregation(aggregation, field)
+                        .from(@model.table_name)
+                        .aggregation(aggregation, field)
 
       sql_builder.where(where_clause) unless where_clause.empty?
 
@@ -82,12 +82,12 @@ module EasyMapper
         assoc.cls.attributes.each do |attr|
           sql_builder.column(
             attr.to_s,
-            from: "#{assoc.name}",
+            from: assoc.name.to_s,
             as: "#{assoc.name}.#{attr}"
           )
         end
 
-        sql_builder.join(assoc.cls.table_name, on: {column => :id})
+        sql_builder.join(assoc.cls.table_name, on: { column => :id })
       end
     end
   end
