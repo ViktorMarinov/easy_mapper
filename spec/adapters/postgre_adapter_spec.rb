@@ -11,24 +11,9 @@ RSpec.describe 'EasyMapper::Adapters::PostgreAdapter' do
     )
   end
 
-  let(:record) do
-    {
-      id: 1,
-      first_name: 'Pesho',
-      last_name: 'Petrov',
-      age: 20
-    }
-  end
-
   describe 'connect' do
     it 'uses the config given on creation' do
       @adapter.connect
-    end
-  end
-
-  describe 'escape' do
-    it 'escapes the string properly' do
-      expect(@adapter.escape("' or ''='")).to eq "'' or ''''=''"
     end
   end
 end

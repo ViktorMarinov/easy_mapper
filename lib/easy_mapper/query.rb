@@ -119,8 +119,8 @@ module EasyMapper
     def map_associations_to_one(record)
       @model.associations_to_one.map do |assoc|
         assoc_record = record
-          .select { |key, _| key.to_s.include? "#{assoc.name}_" }
-          .map { |k, v| [k.to_s.gsub("#{assoc.name}_", "").to_sym, v] }
+          .select { |key, _| key.to_s.include? "#{assoc.name}." }
+          .map { |k, v| [k.to_s.gsub("#{assoc.name}.", "").to_sym, v] }
           .to_h
         [
           assoc.name,

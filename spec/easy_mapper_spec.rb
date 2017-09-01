@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'easy_mapper/model'
+require 'easy_mapper/logger'
 
 RSpec.describe EasyMapper do
   it 'has a version number' do
@@ -16,7 +17,7 @@ RSpec.describe EasyMapper do
   end
 
   before(:all) do
-    # TODO: auto start a test database
+    EasyMapper::Logger.device = 'easy_mapper.log'
 
     EasyMapper::Config.db_adapter = EasyMapper::Adapters::PostgreAdapter.new(
       database: 'easy_mapper_test_db',

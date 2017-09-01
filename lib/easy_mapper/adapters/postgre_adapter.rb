@@ -2,6 +2,7 @@ require 'pg'
 require 'sqlbuilder'
 
 require_relative 'results/postgre_result'
+require_relative '../logger'
 
 module EasyMapper
   module Adapters
@@ -26,21 +27,17 @@ module EasyMapper
       def connect
         @connection = PGconn.connect(@connection_options)
 
+        @connection.set_notice_processor do |warning|
+          Logger.logger.warn(warning)
+        end
+
         @connection.type_map_for_results =
           PG::BasicTypeMapForResults.new(@connection)
       end
 
       def execute(query)
-        puts "EXECUTING: #{query}"
+        Logger.logger.info("Executing query: #{query}")
         PostgreResult.new @connection.exec(query)
-      end
-
-      def escape(value)
-        if value.kind_of? String
-          PG::Connection.escape_string(value)
-        else
-          value
-        end
       end
 
       def sql_builder
