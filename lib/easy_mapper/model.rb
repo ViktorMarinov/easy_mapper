@@ -60,7 +60,17 @@ module EasyMapper
       def delete
         raise Errors::DeleteUnsavedRecordError unless id
 
+        associations_to_many.each do |assoc_to_many|
+          @associations[assoc_to_many.name].each do |model|
+            model.delete
+          end
+        end
+
         repository.delete(id: id)
+
+        associations_to_one.each do |assoc_to_one|
+          result = @associations[assoc_to_one.name].delete
+        end
       end
 
       def ==(other)

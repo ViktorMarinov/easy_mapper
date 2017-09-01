@@ -123,7 +123,7 @@ RSpec.describe EasyMapper do
     pesho = user_model.new(first_name: 'Pesho', age: 20).save
     gosho = user_model.new(first_name: 'Gosho', age: 25).save
 
-    actual = user_model.objects.limit(2).all.exec
+    actual = user_model.objects.limit(2).all
     expect(actual.length).to be 2
   end
 
@@ -132,7 +132,7 @@ RSpec.describe EasyMapper do
     pesho = user_model.new(first_name: 'Pesho', age: 20).save
     gosho = user_model.new(first_name: 'Gosho', age: 25).save
 
-    actual = user_model.objects.limit(5).all.exec
+    actual = user_model.objects.limit(5).all
     expect(actual.length).to be 3
   end
 
@@ -141,7 +141,7 @@ RSpec.describe EasyMapper do
     pesho = user_model.new(first_name: 'Pesho', age: 20).save
     gosho = user_model.new(first_name: 'Gosho', age: 25).save
 
-    actual = user_model.objects.offset(2).all.exec
+    actual = user_model.objects.offset(2).all
     expect(actual.length).to be 1
     expect(actual.first).to eq gosho
   end
@@ -257,6 +257,28 @@ RSpec.describe EasyMapper do
         found_emp = @employee_model.find_by_name('pesho').first
         expect(found_emp.address).to eq address
       end
+
+      it 'owned models are deleted on owner #delete' do
+        address = @address_model.new(city: 'Sofia', street: 'Notreal Str.')
+        employee = @employee_model.new(name: 'pesho', address: address)
+        employee.save
+        employee.delete
+
+        expect(@employee_model.objects.all).to be_empty
+        expect(@address_model.objects.all).to be_empty
+      end
+
+      it 'associations are updated after owner #save' do
+        address1 = @address_model.new(city: 'Sofia', street: 'Notreal Str.')
+        address2 = @address_model.new(city: 'New York', street: 'Real Str.')
+        employee = @employee_model.new(name: 'pesho', address: address1)
+        employee.save
+        employee.address = address2
+        employee.save
+
+        result = @employee_model.find_by_name('pesho').first.address
+        expect(result).to eq address2
+      end
     end
 
     describe '#has_many' do
@@ -308,6 +330,20 @@ RSpec.describe EasyMapper do
 
         result = @phone_book.find_by_id(id).first
         expect(result.phone_entries).to match_array [pesho, gosho]
+      end
+
+      it 'owned models are deleted on owner #delete' do
+        gosho = @phone_entry.new(name: 'Gosho', phone: '0885857378')
+        pesho = @phone_entry.new(name: 'Pesho', phone: '0874537563')
+        book = @phone_book.new(
+          county: 'Bulgaria',
+          phone_entries: [gosho, pesho]
+        ).save
+
+        book.delete
+
+        expect(@phone_book.objects.all).to be_empty
+        expect(@phone_entry.objects.all).to be_empty
       end
     end
   end

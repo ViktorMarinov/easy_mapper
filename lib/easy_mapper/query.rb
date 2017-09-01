@@ -26,10 +26,6 @@ module EasyMapper
       self
     end
 
-    def all
-      where({})
-    end
-
     def order(fields = nil)
       return @order unless fields
 
@@ -65,6 +61,10 @@ module EasyMapper
 
     def exec
       map_to_model_instances @model.repository.find(self)
+    end
+
+    def all
+      where({}).exec
     end
 
     def single_result
